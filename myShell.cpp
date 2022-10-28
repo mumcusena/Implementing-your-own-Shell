@@ -94,8 +94,6 @@ void copyfile(string source_file, string new_file) {
     }
 }
 
-// dididothat
-
 // hellotext
 
 
@@ -115,7 +113,7 @@ int main(int argc, char const *argv[])
     // get the username of the desktop -> we need this thourout the program
     string username = getenv("USER");
 
-    const char * history[15] = {"", "", "", "", "",  "", "", "", "",  "", "", "", "", "", ""};
+    deque<string> history;
     string line = "";
 
     // get the input
@@ -126,14 +124,27 @@ int main(int argc, char const *argv[])
         getline(cin, line);
 
         if(regex_match(line, listdir_expr)){
+            if(history.size() == 15){
+                history.pop_front();
+            }
+            history.push_back("\"" + line + "\"");
+
             my_listdir();
         }
 
         else if(regex_match(line, mycomputername_expr)){
+            if(history.size() == 15){
+                history.pop_front();
+            }
+            history.push_back("\"" + line + "\"");
             my_mycomputername();
         }
 
         else if(regex_match(line, whatsmyip_expr)) {
+            if(history.size() == 15){
+                history.pop_front();
+            }
+            history.push_back("\"" + line + "\"");
             whatsmyip();
         }
 
@@ -144,6 +155,10 @@ int main(int argc, char const *argv[])
             while(ss >> word){
                 param.push_back(word);
             }
+            if(history.size() == 15){
+                history.pop_front();
+            }
+            history.push_back("\"" + line + "\"");
             printfile(param[1]);
         }
 
@@ -155,16 +170,37 @@ int main(int argc, char const *argv[])
             while(ss >> word) {
                 param.push_back(word);
             }
-
+            if(history.size() == 15){
+                history.pop_front();
+            }
+            history.push_back("\"" + line + "\"");
             copyfile(param[1], param[3]);
         }
 
         else if(regex_match(line, dididothat_expr)){
+            vector<string> param;
+            if(history.size() == 15){
+                history.pop_front();
+            }
+            history.push_back("\"" + line + "\"");
+            stringstream ss(line);
+            string word;
+            while(ss >> word) {
+                param.push_back(word);
+            }
 
+            if(find(begin(history), end(history), param[1]) != end(history)) {
+                cout << "Yes" << endl;
+            } else {
+                cout << "No" << endl;
+            }
         }
 
         else if(regex_match(line, hellotext_expr)) {
-
+            if(history.size() == 15){
+                history.pop_front();
+            }
+            history.push_back("\"" + line + "\"");
         }
     }
     
