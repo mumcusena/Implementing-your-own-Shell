@@ -87,7 +87,7 @@ void copyfile(string source_file, string new_file) {
         const char* old = source_file.c_str();
         const char* newfile = new_file.c_str();
         cout << old << endl;
-        execlp("/bin/cat", "cat", old, ">", newfile, NULL);
+        execlp("/bin/cp", "cp", old, newfile, NULL);
         exit(0);
     } else {
         wait(NULL);
@@ -106,7 +106,7 @@ int main(int argc, char const *argv[])
     regex mycomputername_expr("^\\s*mycomputername\\s*$");
     regex whatsmyip_expr("^\\s*whatsmyip\\s*$");
     regex printfile_expr("^\\s*printfile\\s*\\w+\\.*\\w*\\s*$");
-    regex copyfile_expr("^\\s*printfile\\s*\\w+\\.*\\s*>\\s*\\w+\\.*\\s*$");
+    regex copyfile_expr("^\\s*printfile\\s*\\w+\\.*\\w*\\s*>\\s*\\w+\\.*\\w*\\s*$");
     regex dididothat_expr("^\\s*dididothat\\s*\"\\w+\"\\s*$");
     regex hellotext_expr("^\\s*hellotext\\s*$");
 
@@ -164,7 +164,7 @@ int main(int argc, char const *argv[])
 
         else if(regex_match(line, copyfile_expr)) {
             vector <string> param;
-
+            cout << "bura" << endl;
             stringstream ss(line);
             string word;
             while(ss >> word) {
