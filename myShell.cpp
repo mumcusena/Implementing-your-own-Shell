@@ -201,7 +201,9 @@ int main(int argc, char const *argv[])
                 history.pop_front();
             }
             history.push_back("\"" + line + "\"");
+            system("gedit");
         }
+
     }
     
     
