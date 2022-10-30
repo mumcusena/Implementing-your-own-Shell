@@ -9,6 +9,8 @@
 #include <string>
 #include <regex>
 #include <sstream>
+#include <iostream>
+#include <fstream>
 #include <vector>
 
 using namespace std;
@@ -67,19 +69,14 @@ void whatsmyip(){
 // Filename should be given directly without ""
 void printfile(string file_name){
     
-    pid_t pid;
-
-    pid = fork();
-    if(pid < 0) {
-        cout << "an error with printfile" << endl;
-    } else if(pid == 0) {
-        const char * file = file_name.c_str();
-        execlp("/bin/cat", "cat", file, NULL);
-        exit(0);
-    } else {
-        wait(NULL);
-        cout << endl;
+    string my_line;
+    ifstream read_file(file_name);
+    while (getline(read_file, my_line))
+    {
+        cout << my_line;
+        cin.ignore();
     }
+    
 }
 // This function implements the "printfile (file1) > (file2)" command
 // by creating a child process which uses the cp command. 
