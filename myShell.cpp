@@ -1,19 +1,19 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include <iostream> //Used to perform input and output operations
-#include <string> //Perform string manipulation operations
-#include <stdlib.h> //exit()
-#include <sys/wait.h> //wait()
-#include <bits/stdc++.h> //// using stringstream
-#include <fcntl.h> //file control options
+#include <iostream>
+#include <stdlib.h>
+#include <sys/wait.h> 
+#include <bits/stdc++.h> 
+#include <fcntl.h> 
 #include <string>
 #include <regex>
 #include <sstream>
 #include <vector>
 
 using namespace std;
-// listdir fonksiyonu
+// this function implements the "listdir" command.
+// by creating a child process and executing ls command.
 void my_listdir(){
     pid_t pid;
 
@@ -28,7 +28,9 @@ void my_listdir(){
         wait(NULL);
     }
 }
-// mycomputername function
+// this function implements the "mycomputername" command
+// by creating a child process which calls the whoami command.
+// the parent process waits untill the child process is completed.
 void my_mycomputername(){
     pid_t pid;
 
@@ -44,7 +46,8 @@ void my_mycomputername(){
         wait(NULL);
     }
 }
-// whatsmyip function
+// This function implements the "whatsmyip" command
+// by creating a child process that calls the hostname -I comamnd.
 void whatsmyip(){
     pid_t pid;
 
@@ -59,7 +62,9 @@ void whatsmyip(){
         wait(NULL);
     }
 }
-// printfile function
+// This function implements the "printfile (filename)" command
+// by creating a child process that calls cat command with the filename
+// Filename should be given directly without ""
 void printfile(string file_name){
     
     pid_t pid;
@@ -76,7 +81,9 @@ void printfile(string file_name){
         cout << endl;
     }
 }
-// printfile2 function
+// This function implements the "printfile (file1) > (file2)" command
+// by creating a child process which uses the cp command. 
+// Filenames should be given directly without any "".
 void copyfile(string source_file, string new_file) {
     pid_t pid;
 
@@ -86,7 +93,6 @@ void copyfile(string source_file, string new_file) {
     } else if(pid == 0) {
         const char* old = source_file.c_str();
         const char* newfile = new_file.c_str();
-        cout << old << endl;
         execlp("/bin/cp", "cp", old, newfile, NULL);
         exit(0);
     } else {
@@ -94,126 +100,142 @@ void copyfile(string source_file, string new_file) {
     }
 }
 
-// hellotext
-
-
+// processes the input commands
 int main(int argc, char const *argv[])
 {
-    /* code */
-
     // regex of possible commands
     regex listdir_expr("^\\s*listdir\\s*$");
     regex mycomputername_expr("^\\s*mycomputername\\s*$");
     regex whatsmyip_expr("^\\s*whatsmyip\\s*$");
     regex printfile_expr("^\\s*printfile\\s*\\w+\\.*\\w*\\s*$");
     regex copyfile_expr("^\\s*printfile\\s*\\w+\\.*\\w*\\s*>\\s*\\w+\\.*\\w*\\s*$");
-    regex dididothat_expr("^\\s*dididothat\\s*\"\\w+\"\\s*$");
     regex hellotext_expr("^\\s*hellotext\\s*$");
+    regex exit_expr("^\\s*exit\\s*$");
 
     // get the username of the desktop -> we need this thourout the program
     string username = getenv("USER");
 
+    // Keeps the command history for the "dididothat" command
     deque<string> history;
     string line = "";
-
-    // get the input
-    // traverse line by line while exit commandi gelene kadar
-    while (line != "exit")
+    cout << "Welcome to myShell " << username << " <3!!!" << endl;
+    
+    // This while loop traverses the input line until the user enters the "exit" command.
+    while (!(regex_match(line, exit_expr)))
     {
+        // for every user command username and " >>> " will be printed
         cout << username << " >>> ";
         getline(cin, line);
 
+        // create a list of words in the input file
+        // create a string of input line without spaces to use it in history list
+        vector<string> line_list;
+        stringstream ls(line);
+        string part;
+        string line_without_space = "";
+        while(ls >> part){
+            line_list.push_back(part);
+            line_without_space += part;
+        }
+
+        // if input line matches "listdir" command syntax
         if(regex_match(line, listdir_expr)){
+            // check if history full, if full pop the oldest command
             if(history.size() == 15){
                 history.pop_front();
             }
-            history.push_back("\"" + line + "\"");
-
+            // add the new command to history
+            history.push_back("\"" + line_without_space + "\"");
+            // call the function for listdir implementation
             my_listdir();
         }
 
+        // if input line matches "mycomputername" command syntax
         else if(regex_match(line, mycomputername_expr)){
+            // check if history full, if full pop the oldest command
             if(history.size() == 15){
                 history.pop_front();
             }
-            history.push_back("\"" + line + "\"");
+            // add the new command to history
+            history.push_back("\"" + line_without_space + "\"");
+            // call the function for mycomputername implementation
             my_mycomputername();
         }
-
+        // if input line matches "whatsmyip" command syntax
         else if(regex_match(line, whatsmyip_expr)) {
+            // check if history full, if full pop the oldest command
             if(history.size() == 15){
                 history.pop_front();
             }
-            history.push_back("\"" + line + "\"");
+            // add the new command to history
+            history.push_back("\"" + line_without_space + "\"");
+            // call the function for whatsmyip implementation
             whatsmyip();
         }
-
+        // if input line matches "printfile (filename)" command syntax
         else if (regex_match(line, printfile_expr)){
-            vector <string> param;
-            stringstream ss(line);
-            string word;
-            while(ss >> word){
-                param.push_back(word);
-            }
+            // check if history full, if full pop the oldest command
             if(history.size() == 15){
                 history.pop_front();
             }
-            history.push_back("\"" + line + "\"");
-            printfile(param[1]);
+            // add the new command to history
+            history.push_back("\"" + line_without_space + "\"");
+            // call the function for printfile implementation
+            printfile(line_list[1]);
         }
-
+        // if input line matches "printfile (filename) > (filename2)" command syntax
         else if(regex_match(line, copyfile_expr)) {
-            vector <string> param;
-            cout << "bura" << endl;
-            stringstream ss(line);
-            string word;
-            while(ss >> word) {
-                param.push_back(word);
-            }
+            // check if history full, if full pop the oldest command
             if(history.size() == 15){
                 history.pop_front();
             }
-            history.push_back("\"" + line + "\"");
-            copyfile(param[1], param[3]);
+            // add the new command to history
+            history.push_back("\"" + line_without_space + "\"");
+            // call the function for copyfile implementation
+            copyfile(line_list[1], line_list[3]);
         }
-
-        else if(regex_match(line, dididothat_expr)){
-            vector<string> param;
-            if(history.size() == 15){
-                history.pop_front();
+        // if input matches "dididothat" command syntax
+        else if(line_list[0] == "dididothat"){
+            // get the expression after dididothat command
+            string expr = "";
+            for(string word: line_list){
+                if(word != "dididothat"){
+                    expr = expr + word;
+                }
+                expr = expr + " ";
             }
-            history.push_back("\"" + line + "\"");
-            stringstream ss(line);
-            string word;
-            while(ss >> word) {
-                param.push_back(word);
+            // remove the whitespaces form the expression to compare with the history list
+            // this way if user input additional whitespaces in dididothat command the program disregards those whitespaces
+            stringstream qs(expr);
+            string var;
+            string result = "";
+            while(qs >> var){
+                result += var;
             }
-
-            if(find(begin(history), end(history), param[1]) != end(history)) {
+            // if expression in history list
+            if(find(begin(history), end(history), result) != end(history)) {
                 cout << "Yes" << endl;
             } else {
                 cout << "No" << endl;
             }
         }
-
+        // if input matches "hellotext" command syntax
         else if(regex_match(line, hellotext_expr)) {
             if(history.size() == 15){
                 history.pop_front();
             }
-            history.push_back("\"" + line + "\"");
+            history.push_back("\"" + line_without_space + "\"");
+            // use the system function to call gedit command
             system("gedit");
+        }
+        // in case of invalid command input prompt a warning message
+        else {
+            if(line_without_space != "exit"){
+                cout << "You have entered an invalid command. Please check spelling or the project description for the valid commands. :)" << endl;
+            }
+            
         }
 
     }
-    
-    
-    
-
-    // initialize an array to store the last 15 commands -> her loopta bakicaz bos yer var mi diye, yoksa en eskisini cikarip 
-    // yeni commandi eklicez
-
-    // if blockuyla yukaridaki fonksiyonlara at
-
-
     return 0;
 }
